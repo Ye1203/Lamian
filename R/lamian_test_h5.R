@@ -117,14 +117,12 @@ lamian_test_h5 <- function(expr, cellanno, pseudotime, design=NULL, testvar=2, p
     pval.overall <- sapply(seq_len(nrow(llr.overall)), function(i) {
       z <- llr.overall[i, seq(2, ncol(llr.overall))]
       z <- z[!is.na(z)]
-      if (length(z) == 0) return(NA)
       den <- density(z)$bw
       mean(pnorm(llr.overall[i, 1], z, sd = den, lower.tail = F))
     })
     log.pval <- sapply(seq_len(nrow(llr.overall)), function(i) {
       z <- llr.overall[i, seq(2, ncol(llr.overall))]
       z <- z[!is.na(z)]
-      if (length(z) == 0) return(NA)
       den <- density(z)$bw
       max(pnorm(llr.overall[i, 1], z, sd = den, lower.tail = F, log.p = T))
     })

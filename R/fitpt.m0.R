@@ -98,19 +98,21 @@ fitpt.m0 <- function(expr, cellanno, pseudotime, design, EMmaxiter=100, EMitercu
     eta[gidr] <- sapply(gidr, function(g) {
       meanN <- mean(N[g, ])
       meanA <- mean(A[g, ])
-      fleft = digamma(1e-10 * meanN) - log(1e-10) + meanA
-      fright = digamma(1e10 * meanN) - log(1e10) + meanA
-      if (fleft * fright > 0) {
-        warning(paste("No root found for gene", g))
-        return(NA)
+      f <- function(eta) digamma(eta * meanN) - log(eta) + meanA
+      f_lower <- f(1e-10)
+      f_upper <- f(1e10)
+      if (f_lower * f_upper > 0) {
+        result <- tryCatch(
+          uniroot(f, c(1e-20, 1e20), tol = 1e-12)$root,
+          error = function(e) {
+            warning(paste0("No root found for gene: ", g))
+            NA
+          }
+        )
       } else {
-        res <- tryCatch({
-          uniroot(function(eta) {
-            digamma(eta * meanN) - log(eta) + meanA
-          }, c(1e-5, 1e5), tol = 1e-8)$root
-        }, error=function(e) NA)
-        return(res)
+        result <- uniroot(f, c(1e-10, 1e10))$root
       }
+      result
     })
     alpha[gidr] <- eta[gidr] * rowMeans(N)
     para <- list(beta = B, alpha = alpha, eta = eta, omega = omega)
