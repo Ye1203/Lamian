@@ -216,7 +216,7 @@ lamian_test <- function(expr, cellanno, pseudotime, design=NULL, testvar=2, perm
     parameter <- fit[[1]]$fitres.full$parameter
     ll.full <- sapply(seq_len(length(fit)),function(i) sapply(fit[[i]]$fitres.full$parameter,function(j) unname(j$ll),USE.NAMES = F)[row.names(expr)])
     ll.null <- sapply(seq_len(length(fit)),function(i) sapply(fit[[i]]$fitres.null$parameter,function(j) unname(j$ll),USE.NAMES = F)[row.names(expr)])
-    llr.overall <<- ll.full - ll.null
+    llr.overall <- ll.full - ll.null
     pval.overall <- sapply(seq_len(nrow(llr.overall)), function(i) {
       z <- llr.overall[i, seq(2, ncol(llr.overall))]
       z <- z[!is.na(z)]
@@ -352,7 +352,6 @@ lamian_test <- function(expr, cellanno, pseudotime, design=NULL, testvar=2, perm
       if (sum(fdr.overall<0.05) == 1){
         z <- llr[seq(2, length(llr))]
         z <- z[!is.na(z)]
-        if (length(z) < 2) return(NA)
         den <- density(z)$bw
         fdr <- pval <- mean(pnorm(llr[1], z, sd=den,lower.tail = F))
         log.pval <- mean(pnorm(llr[1], z, sd=den,lower.tail = F,log.p=T))
