@@ -80,10 +80,17 @@ fitfunc_h5 <- function(iter, diffType = 'overall', gene = NULL, testvar = testva
     } else {
       dn <- paste0(as.vector(design),collapse = '_')
       perdn <- dn
-      while(perdn==dn) {
+      # make sure perdesign is full rank
+      while (TRUE) {
         perid <- sample(1:nrow(design))
-        perdesign <- design[perid,,drop=F]
-        perdn <- paste0(as.vector(perdesign),collapse = '_')  
+        perdesign <- design
+        perdesign[, testvar] <- design[perid, testvar]
+        rnk <- as.integer(Matrix::rankMatrix(perdesign))
+        perdn_new <- paste0(perdesign[, testvar], collapse = '_')
+        if (perdn_new != dn && rnk == ncol(perdesign)) {
+          perdn <- perdn_new
+          break 
+        }
       }
       row.names(perdesign) <- row.names(design)
       sampcell <- sample(1:length(pseudotime),replace=T) ## boostrap cells

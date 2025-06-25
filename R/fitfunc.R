@@ -68,7 +68,7 @@ fitfunc <- function(iter, diffType = 'overall', gene = rownames(expr), test.type
       mod.null = 2
     }
     if (iter == 1){
-      fitres.full <- fitpt(expr, cellanno, pseudotime, design,testvar=testvar, EMmaxiter=EMmaxiter, EMitercutoff=EMitercutoff, ncores=1, model = mod.full) 
+      fitres.full <- fitpt(expr, cellanno, pseudotime, design, testvar=testvar, EMmaxiter=EMmaxiter, EMitercutoff=EMitercutoff, ncores=1, model = mod.full) 
       fitres.null <- fitpt(expr, cellanno, pseudotime, design, testvar=testvar, EMmaxiter=EMmaxiter, EMitercutoff=EMitercutoff, ncores=1, model = mod.null, knotnum = fitres.full[[2]])
       if (exists('fitres.full') & exists('fitres.null')) {
         if (verbose.output) print(paste0('iter ', iter, ' success!'))
@@ -80,11 +80,17 @@ fitfunc <- function(iter, diffType = 'overall', gene = rownames(expr), test.type
     } else {
       dn <- paste0(design[,testvar],collapse = '_')
       perdn <- dn
-      while(perdn==dn) {
+      # make sure perdesign is full rank
+      while (TRUE) {
         perid <- sample(1:nrow(design))
         perdesign <- design
-        perdesign[,testvar] <- design[perid,testvar]
-        perdn <- paste0(perdesign[,testvar],collapse = '_')  
+        perdesign[, testvar] <- design[perid, testvar]
+        rnk <- as.integer(Matrix::rankMatrix(perdesign))
+        perdn_new <- paste0(perdesign[, testvar], collapse = '_')
+        if (perdn_new != dn && rnk == ncol(perdesign)) {
+          perdn <- perdn_new
+          break 
+        }
       }
       row.names(perdesign) <- row.names(design)
       sampcell <- sample(1:ncol(expr),replace=T) ## boostrap cells
