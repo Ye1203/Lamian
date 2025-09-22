@@ -89,9 +89,10 @@ plotGenePopulation <- function(testobj,
     if (is.na(gene))
       gene <- rownames(fit[[1]])
     pd <- sapply(seq_len(length(fit)), function(i) {
-      tmp <- reshape2::melt(fit[[i]][gene, , drop = FALSE])
+      pt_i <- seq(1, max(testobj$pseudotime), length.out = ncol(fit[[i]]))
+      colnames(fit[[i]]) <- as.character(pt_i)
+      
       if (!is.na(subSampleNumber)) {
-        ## set.seed(12345)
         id <- sample(seq_len(nrow(fit[[i]])), subSampleNumber)
         tmp <- reshape2::melt(fit[[i]][gene, id , drop = FALSE])
       } else {
@@ -99,10 +100,10 @@ plotGenePopulation <- function(testobj,
       }
       
       colnames(tmp) <- c('gene', 'pseudotime', 'expression')
+      tmp$pseudotime <- as.numeric(as.character(tmp$pseudotime))
+      
       if (!is.na(subSampleNumber)) {
-        ## set.seed(12345)
-        tmp <-
-          tmp[sample(seq_len(nrow(tmp)), subSampleNumber), , drop = FALSE]
+        tmp <- tmp[sample(seq_len(nrow(tmp)), subSampleNumber), , drop = FALSE]
       }
       tmp <- data.frame(tmp,
                         type = names(fit)[i],
@@ -132,6 +133,7 @@ plotGenePopulation <- function(testobj,
       xlab('Pseudotime') +
       ylab('Expression') +
       labs(color = '')
+    if(length(gene) != 1){
     if (is.na(ncol)) {
       p <- p + facet_wrap( ~ gene, nrow = nrow, scales = a)
     } else {
@@ -142,7 +144,7 @@ plotGenePopulation <- function(testobj,
     } else {
       p <-
         p + scale_color_manual(values = grDevices::colorRampPalette(brewer.pal(8, palette))(length(unique(pd$type))))
-    }
+    }}
   }
   
   if (!is.na(ylim)[1])
@@ -156,5 +158,4 @@ plotGenePopulation <- function(testobj,
     p <-
       p + scale_x_continuous(breaks = c(min(pd$pseudotime), max(pd$pseudotime)))
   }
-  print(p)
 }

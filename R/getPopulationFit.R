@@ -24,7 +24,7 @@ getPopulationFit <- function(testobj,
   } else {
     testvar = testobj$testvar
   }
-    
+  
   if (type == 'VARIABLE'){
     design = testobj$design[, c(1, testobj$testvar)] ## design for multi
   } else {
@@ -33,14 +33,14 @@ getPopulationFit <- function(testobj,
   knotnum = testobj$knotnum
   pseudotime = testobj$pseudotime
   pseudotime = pseudotime[order(pseudotime)]
-  pt <- round(seq(1, max(pseudotime), length.out = min(num.timepoint, max(pseudotime)))) ## downsample
+  pt <- seq(min(pseudotime), max(pseudotime), length.out = num.timepoint)
   
   if (sum(design[, 1]) != nrow(design)){
     print("The first column of design matrix should be all 1s (intercept)! Using the first column as the variable column ...")
     design = cbind(intercept = 1, design)
     colnames(design)[1] <- 'intercept'
   }
-
+  
   if (is.null(gene)) gene <- rownames(testobj$statistics)
   
   if (type == 'TIME') {
@@ -58,7 +58,7 @@ getPopulationFit <- function(testobj,
     } else {
       beta = as.vector(tmp[1, ]) ### subset the beta values of the intercept and the test covariate for multi
     }
-      
+    
     x <- sapply(row.names(design), function(i) {
       kronecker(diag(knotnum[g] + 4), design[i, , drop = FALSE]) ###
     }, simplify = FALSE)

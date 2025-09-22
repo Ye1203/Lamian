@@ -22,7 +22,7 @@ getCovariateGroupDiff <- function(testobj,
                                   num.timepoint = 1e3,
                                   testvar = 2) {
   knotnum = testobj$knotnum[gene]
-  pseudotime = seq(1, max(testobj$pseudotime), length.out = min(num.timepoint, max(testobj$pseudotime)))
+  pseudotime = seq(1, max(testobj$pseudotime), length.out = num.timepoint)
   if ('testvar' %in% names(testobj)) testvar = testobj$testvar
   beta <- lapply(gene, function(g) {
     tmp = matrix(testobj$parameter[[g]]$beta, ncol = knotnum[g]+4)
